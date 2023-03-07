@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Settings struct {
@@ -21,7 +22,11 @@ var Logger *log.Logger
 func init() {
 	// 初始化日志
 	fmt.Printf("初始化日志文件\n")
-	logFile, err := os.OpenFile("./log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
+	logFile, err := os.OpenFile("./log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
+	if err != nil {
+		fmt.Printf("日志文件打开失败 [Err:%s]\n", err.Error())
+		panic(err)
+	}
 	Logger = log.New(logFile, "", log.LstdFlags|log.Lshortfile)
 	// 初始化配置
 	fmt.Printf("初始化配置\n")
@@ -68,9 +73,12 @@ func main() {
 		}
 
 	})
-	r.Run("0.0.0.0:8012") // 监听并在 0.0.0.0:8080 上启动服务
+	r.Run("0.0.0.0:8012") // 监听并在 0.0.0.0:8012 上启动服务
 }
 
+// Chat function
+//
+// param content is the user's input
 func chat(content string) (string, error) {
 	var data = map[string]interface{}{
 		"model": "gpt-3.5-turbo",
@@ -81,11 +89,11 @@ func chat(content string) (string, error) {
 			},
 		},
 	}
-	b, err := json.Marshal(data)
+	b, _ := json.Marshal(data)
 	req, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(b))
-	// 比如说设置个token
+	// set token
 	req.Header.Set("Authorization", "Bearer "+settings.Openai)
-	// 再设置个json
+	// set json
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := (&http.Client{}).Do(req)
