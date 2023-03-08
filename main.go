@@ -13,7 +13,7 @@ import (
 )
 
 type Settings struct {
-	Openai string `json:"openai"`
+	Token string `json:"openai"`
 }
 
 var settings Settings
@@ -92,7 +92,7 @@ func chat(content string) (string, error) {
 	b, _ := json.Marshal(data)
 	req, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(b))
 	// set token
-	req.Header.Set("Authorization", "Bearer "+settings.Openai)
+	req.Header.Set("Authorization", "Bearer "+settings.Token)
 	// set json
 	req.Header.Set("Content-Type", "application/json")
 
